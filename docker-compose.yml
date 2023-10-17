@@ -6,6 +6,8 @@ services:
     container_name: timescaledb
     image: timescale/timescaledb:2.0.0-pg12
     restart: always
+    ports:
+      - 5559:5432
     volumes:
       - ./cqube-data/pgdata:/var/lib/postgresql/data
     env_file:
@@ -14,7 +16,7 @@ services:
   graphql-engine:
     image: hasura/graphql-engine:latest
     ports:
-      - '8080:8080'
+      - '19387:8080'
     volumes:
       - ./cqube-data/migrations:/hasura-migrations
       - ./cqube-data/metadata:/hasura-metadata
@@ -26,10 +28,9 @@ services:
       ## enable the console served by server
       HASURA_GRAPHQL_ENABLE_CONSOLE: 'true' # set to "false" to disable console
       ## enable debugging mode. It is recommended to disable this in production
-      HASURA_GRAPHQL_DEV_MODE: 'true'
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup,http-log,webhook-log,websocket-log,query-log
       ## uncomment next line to set an admin secret
-      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_ADMIN_SECRET}
       HASURA_GRAPHQL_MIGRATIONS_DISABLE_TRANSACTION: 'true'
       HASURA_GRAPHQL_CONSOLE_ASSETS_DIR: /srv/console-assets
 

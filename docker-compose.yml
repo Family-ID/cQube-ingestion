@@ -6,10 +6,8 @@ services:
     container_name: timescaledb
     image: timescale/timescaledb:2.0.0-pg12
     restart: always
-    ports:
-      - '5432:5432'
     volumes:
-      - ./pgdata:/var/lib/postgresql/data
+      - ./cqube-data/pgdata:/var/lib/postgresql/data
     env_file:
       - .env
 
@@ -18,13 +16,13 @@ services:
     ports:
       - '8080:8080'
     volumes:
-      - ./data/migrations:/hasura-migrations
-      - ./data/metadata:/hasura-metadata
+      - ./cqube-data/migrations:/hasura-migrations
+      - ./cqube-data/metadata:/hasura-metadata
     depends_on:
       - 'timescaledb'
     restart: always
     environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://timescaledb:postgrespassword@timescaledb:5432/postgres?sslmode=disable
+      HASURA_GRAPHQL_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@timescaledb:5432/postgres?sslmode=disable
       ## enable the console served by server
       HASURA_GRAPHQL_ENABLE_CONSOLE: 'true' # set to "false" to disable console
       ## enable debugging mode. It is recommended to disable this in production
@@ -35,19 +33,19 @@ services:
       HASURA_GRAPHQL_MIGRATIONS_DISABLE_TRANSACTION: 'true'
       HASURA_GRAPHQL_CONSOLE_ASSETS_DIR: /srv/console-assets
 
-  pgpool-serv:
-    image: bitnami/pgpool
-    ports:
-      - 5433:5432
-    volumes:
-      - ./configs/pgpool-extra.conf:/config/myconf.conf
-    environment:
-      # https://github.com/bitnami/bitnami-docker-pgpool#configuration
-      - PGPOOL_BACKEND_NODES=0:timescaledb:5432
-      - PGPOOL_SR_CHECK_USER=timescaledb
-      - PGPOOL_SR_CHECK_PASSWORD=postgrespassword
-      - PGPOOL_POSTGRES_USERNAME=timescaledb
-      - PGPOOL_POSTGRES_PASSWORD=postgrespassword
-      - PGPOOL_ADMIN_USERNAME=timescaledb
-      - PGPOOL_ADMIN_PASSWORD=postgrespassword
-      - PGPOOL_USER_CONF_FILE=/config/myconf.conf
+  # pgpool-serv:
+  #   image: bitnami/pgpool
+  #   ports:
+  #     - 5433:5432
+  #   volumes:
+  #     - ./configs/pgpool-extra.conf:/config/myconf.conf
+  #   environment:
+  #     # https://github.com/bitnami/bitnami-docker-pgpool#configuration
+  #     - PGPOOL_BACKEND_NODES=0:timescaledb:5432
+  #     - PGPOOL_SR_CHECK_USER=timescaledb
+  #     - PGPOOL_SR_CHECK_PASSWORD=postgrespassword
+  #     - PGPOOL_POSTGRES_USERNAME=timescaledb
+  #     - PGPOOL_POSTGRES_PASSWORD=postgrespassword
+  #     - PGPOOL_ADMIN_USERNAME=timescaledb
+  #     - PGPOOL_ADMIN_PASSWORD=postgrespassword
+  #     - PGPOOL_USER_CONF_FILE=/config/myconf.conf

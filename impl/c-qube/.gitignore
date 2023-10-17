@@ -39,6 +39,7 @@ lerna-debug.log*
 !rev-and-monitor/**
 
 .env
+debug
 logs
 
 ingest
